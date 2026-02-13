@@ -185,10 +185,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // ******************************************************
-        // IMPORTANT: ต้องเปลี่ยน URL นี้เป็น URL ใหม่ที่ได้จากการ Deploy ล่าสุด!
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt1So5aFxrYah8bds4rXO8DW6_vOO61g8N-zyJQwZJ0w8pwULoKcaoVZ6saSjUnTZN/exec'; 
-        // ******************************************************
+
 
         const allItems = [
             { id: 'status_rail', label: 'ราวข้าง', group: 'generalList' },
@@ -300,23 +298,67 @@
             const tbody = document.getElementById('summaryContent');
             tbody.innerHTML = '';
 
+            // ฟังก์ชันช่วยสร้างแถวตาราง
             const addRow = (label, val) => {
-                tbody.innerHTML += `<tr><td class="text-secondary" style="width:40%; font-weight:600;">${label}</td><td style="font-weight:500;">${val}</td></tr>`;
+                tbody.innerHTML += `<tr>
+                    <td class="text-secondary" style="width:40%; font-weight:600; vertical-align: top;">${label}</td>
+                    <td style="font-weight:500; color:#333;">${val}</td>
+                </tr>`;
             }
 
-            addRow('คนขับ', document.getElementById('driverName').value);
+            // 1. ข้อมูลทั่วไป
+            addRow('ชื่อ-สกุล', document.getElementById('driverName').value);
             addRow('เบอร์โทร', document.getElementById('phone').value);
-            addRow('ทะเบียน', `${document.getElementById('plateHead').value} / ${document.getElementById('plateTail').value}`);
-            addRow('เลขไมล์', document.getElementById('odometer').value);
+            
+            // จัดรูปแบบทะเบียนรถให้สวยงาม
+            const head = document.getElementById('plateHead').value;
+            const tail = document.getElementById('plateTail').value;
+            addRow('ทะเบียน', `<span class="badge bg-primary">${head}</span> (หัว) <br> <span class="badge bg-info text-dark">${tail}</span> (หาง)`);
+            
+            addRow('เลขไมล์', document.getElementById('odometer').value + ' กม.');
             addRow('บริษัท', document.getElementById('company').value);
 
+            // 2. โซน (ที่เคยหายไป)
+            const zone = document.querySelector('input[name="zone"]:checked');
+            if(zone) addRow('โซนปฏิบัติงาน', 'Zone ' + zone.value);
+
+            // 3. รายการตรวจเช็ค (Loop)
             allItems.forEach(item => {
-                const val = document.querySelector(`input[name="${item.id}"]:checked`).value;
-                const color = val === 'แก้ไข' ? 'text-danger fw-bold' : (val === 'พอใช้' ? 'text-warning fw-bold' : 'text-success fw-bold');
-                tbody.innerHTML += `<tr><td>${item.label}</td><td class="${color}">${val}</td></tr>`;
+                const el = document.querySelector(`input[name="${item.id}"]:checked`);
+                const val = el ? el.value : '-'; // กัน error
+                
+                // กำหนดสีและไอคอน
+                let colorClass = 'text-success fw-bold';
+                let icon = '<i class="fas fa-check-circle"></i>';
+                
+                if (val === 'แก้ไข') {
+                    colorClass = 'text-danger fw-bold';
+                    icon = '<i class="fas fa-times-circle"></i>';
+                } else if (val === 'พอใช้') {
+                    colorClass = 'text-warning fw-bold';
+                    icon = '<i class="fas fa-exclamation-circle"></i>';
+                }
+
+                tbody.innerHTML += `<tr>
+                    <td>${item.label}</td>
+                    <td class="${colorClass}">${icon} ${val}</td>
+                </tr>`;
             });
 
-            // Show Multiple Images Preview
+            // 4. หมายเหตุ (ที่เคยหายไป)
+            const remarks = document.getElementById('remarks').value;
+            if(remarks.trim() !== "") {
+                addRow('หมายเหตุ', `<span class="text-danger">${remarks}</span>`);
+            }
+
+            // 5. พิกัด GPS
+            const lat = document.getElementById('lat').value;
+            const long = document.getElementById('long').value;
+            if(lat && long) {
+                addRow('พิกัด GPS', `<a href="https://maps.google.com/?q=${lat},${long}" target="_blank" class="text-decoration-none"><i class="fas fa-map-marker-alt text-danger"></i> ${lat}, ${long}</a>`);
+            }
+
+            // 6. แสดงรูปภาพ (Gallery)
             const files = document.getElementById('fileInput').files;
             const gallery = document.getElementById('imageGallery');
             gallery.innerHTML = '';
@@ -327,15 +369,16 @@
                     reader.onload = function(e) {
                         const img = document.createElement('img');
                         img.src = e.target.result;
-                        img.className = 'gallery-img';
+                        img.className = 'gallery-img'; // ใช้ CSS class เดิม
                         gallery.appendChild(img);
                     }
                     reader.readAsDataURL(file);
                 });
             } else {
-                gallery.innerHTML = '<small class="text-muted">ไม่ได้เลือกรูปภาพ</small>';
+                gallery.innerHTML = '<div class="text-muted text-center w-100">ไม่ได้เลือกรูปภาพ</div>';
             }
 
+            // เปิด Modal
             new bootstrap.Modal(document.getElementById('summaryModal')).show();
         }
 

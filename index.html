@@ -39,12 +39,13 @@
     <div class="header-bg text-center">
         <img src="https://drive.google.com/uc?export=view&id=1y9dLH1Ct2AJMEWFY9pdLHv37VEA99dGO" 
              alt="Logo" class="img-fluid mb-3" 
-             style="max-height: 90px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
+             style="max-height: 80px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); background-color: rgba(255,255,255,0.1); border-radius: 10px; padding: 5px;">
              
-        <h4 class="mb-1 fw-bold">ระบบตรวจเช็ครถบรรทุก</h4>
-        <h5 class="mb-2 fw-bold" style="font-size: 1rem; opacity: 0.9;">(Truck Inspection System) Logistics PSRU</h5>
-        <small class="d-block mt-2 opacity-75" style="font-size: 0.85rem; max-width: 600px; margin: 0 auto;">
-            แบบฟอร์มอัปเดตข้อมูลรถหัวลากและหาง เพื่อนำเข้าข้อมูลการใช้หัวลากและหางรถบรรทุก Logistics PSRU
+        <h3 class="mb-1 fw-bold">ระบบตรวจเช็ครถบรรทุก</h3>
+        <h5 class="mb-2 fw-bold" style="font-size: 1rem; opacity: 0.9;">(Truck Inspection System)</h5>
+        <div style="width: 60px; height: 3px; background: rgba(255,255,255,0.3); margin: 10px auto;"></div>
+        <small class="d-block mt-2 opacity-75" style="font-size: 0.85rem; max-width: 600px; margin: 0 auto; line-height: 1.5;">
+            แบบฟอร์มอัปเดตข้อมูลรถหัวลากและหาง เพื่อนำเข้าข้อมูลสำหรับบริหารจัดการ
         </small>
     </div>
 
@@ -95,8 +96,7 @@
                         <div class="col-6">
                             <label class="form-label">บริษัท <span class="required-star">*</span></label>
                             <select class="form-select" id="company" name="company">
-                                <option value="">เลือก...</option>
-                                <option value="Triple C">Triple C</option>
+                                <option value="" selected disabled>เลือก</option> <option value="Triple C">Triple C</option>
                                 <option value="PROME">PROME</option>
                                 <option value="SMILE">SMILE</option>
                                 <option value="SK">SK</option>
@@ -199,7 +199,6 @@
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt1So5aFxrYah8bds4rXO8DW6_vOO61g8N-zyJQwZJ0w8pwULoKcaoVZ6saSjUnTZN/exec'; 
-
         const allItems = [
             { id: 'status_rail', label: 'ราวข้าง', group: 'generalList' },
             { id: 'status_twist', label: 'ทวิสล็อคตู้ 8 จุด', group: 'generalList' },
@@ -244,7 +243,7 @@
             });
         }
 
-        // 2. GPS Logic (แสดงพิกัดชัดเจน)
+        // 2. GPS Logic 
         function initGPS() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -392,7 +391,7 @@
                 mode: 'no-cors'
             })
             .then(() => {
-                alert('✅ บันทึกข้อมูลสำเร็จ! ขอบคุณที่ร่วมมือตรวจสอบครับ');
+                alert('✅ บันทึกข้อมูลสำเร็จ! ขอขอบคุณค่ะ');
                 window.location.reload();
             })
             .catch(err => {

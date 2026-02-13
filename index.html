@@ -3,66 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบตรวจเช็ครถ (Production Grade)</title>
+    <title>ระบบตรวจเช็ครถ (Logistics PSRU)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f0f2f5; padding-bottom: 80px; }
-        .header-bg { background: linear-gradient(135deg, #0d47a1 0%, #1976d2 100%); color: white; padding: 25px 0; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .card-custom { border: none; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 15px; overflow: hidden; }
-        .card-header-custom { background-color: #fff; border-bottom: 1px solid #eee; padding: 15px; font-weight: bold; color: #0d47a1; display: flex; align-items: center; }
-        .card-header-custom i { margin-right: 10px; font-size: 1.2rem; }
-        .required-star { color: red; margin-left: 3px; font-weight: bold; }
+        .header-bg { background: linear-gradient(135deg, #0d47a1 0%, #1976d2 100%); color: white; padding: 30px 15px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+        .card-custom { border: none; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; overflow: hidden; background: white; }
+        .card-header-custom { background-color: #ffffff; border-bottom: 2px solid #f0f0f0; padding: 15px 20px; font-weight: bold; color: #0d47a1; display: flex; align-items: center; font-size: 1.1rem; }
+        .card-header-custom i { margin-right: 12px; font-size: 1.3rem; color: #1976d2; }
+        .required-star { color: #dc3545; margin-left: 3px; font-weight: bold; }
         
         /* Custom Radio Buttons */
-        .btn-check:checked + .btn-outline-success { background-color: #2e7d32; color: white; font-weight: bold; }
-        .btn-check:checked + .btn-outline-warning { background-color: #f57f17; color: white; font-weight: bold; }
-        .btn-check:checked + .btn-outline-danger { background-color: #c62828; color: white; font-weight: bold; }
+        .btn-check:checked + .btn-outline-success { background-color: #2e7d32; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(46, 125, 50, 0.3); }
+        .btn-check:checked + .btn-outline-warning { background-color: #f57f17; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(245, 127, 23, 0.3); }
+        .btn-check:checked + .btn-outline-danger { background-color: #c62828; color: white; font-weight: bold; box-shadow: 0 2px 4px rgba(198, 40, 40, 0.3); }
         
         /* Validation Error Style */
-        .is-invalid { border-color: #dc3545 !important; background-image: none !important; }
-        .invalid-feedback-custom { color: #dc3545; font-size: 0.875em; margin-top: 0.25rem; display: none; }
+        .is-invalid { border-color: #dc3545 !important; background-image: none !important; box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25); }
+        .invalid-feedback-custom { color: #dc3545; font-size: 0.875em; margin-top: 0.25rem; display: none; font-weight: 500; }
         .is-invalid + .invalid-feedback-custom { display: block; }
 
-        .preview-img { width: 100%; max-height: 300px; object-fit: contain; border: 1px solid #ddd; border-radius: 8px; margin-top: 10px; }
+        .preview-img { width: 100%; max-height: 300px; object-fit: contain; border: 1px solid #ddd; border-radius: 8px; margin-top: 10px; background: #f8f9fa; }
+        
+        /* GPS Box */
+        #gpsStatus { transition: all 0.3s ease; border: none; }
+        .alert-success { background-color: #d1e7dd; color: #0f5132; }
+        .alert-warning { background-color: #fff3cd; color: #664d03; }
     </style>
 </head>
 <body>
 
     <div class="header-bg text-center">
-        <h3 class="mb-0"><i class="fas fa-truck-moving"></i> ตรวจเช็ครถบรรทุก</h3>
-        <small class="opacity-75">แบบฟอร์มอัปเดตข้อมูลรถหัวลากและหาง
-เพื่อนำเข้าข้อมูลการใช้หัวลากและหางรถบรรทุก Logistics PSRU </small>
+        <img src="https://drive.google.com/uc?export=view&id=1y9dLH1Ct2AJMEWFY9pdLHv37VEA99dGO" 
+             alt="Logo" class="img-fluid mb-3" 
+             style="max-height: 90px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
+             
+        <h4 class="mb-1 fw-bold">ระบบตรวจเช็ครถบรรทุก</h4>
+        <h5 class="mb-2 fw-bold" style="font-size: 1rem; opacity: 0.9;">(Truck Inspection System) Logistics PSRU</h5>
+        <small class="d-block mt-2 opacity-75" style="font-size: 0.85rem; max-width: 600px; margin: 0 auto;">
+            แบบฟอร์มอัปเดตข้อมูลรถหัวลากและหาง เพื่อนำเข้าข้อมูลการใช้หัวลากและหางรถบรรทุก Logistics PSRU
+        </small>
     </div>
 
     <div class="container" style="max-width: 800px;">
         
-        <div id="gpsStatus" class="alert alert-warning shadow-sm" role="alert">
+        <div id="gpsStatus" class="alert alert-warning shadow-sm mb-4" role="alert">
             <div class="d-flex align-items-center">
-                <div class="spinner-border spinner-border-sm me-2" id="gpsSpinner"></div>
-                <strong id="gpsText">กำลังค้นหาดาวเทียม GPS...</strong>
-            </div>
-            <div id="gpsCoords" class="mt-2 text-primary fw-bold" style="display:none; font-family: monospace;">
+                <div class="spinner-border spinner-border-sm me-3" id="gpsSpinner"></div>
+                <div>
+                    <strong id="gpsText" style="font-size: 1.05rem;">กำลังค้นหาดาวเทียม GPS...</strong>
+                    <div id="gpsCoords" class="mt-1 text-primary fw-bold" style="display:none; font-family: 'Courier New', monospace; font-size: 0.9rem;"></div>
                 </div>
+            </div>
         </div>
 
         <form id="mainForm" novalidate>
             
             <div class="card card-custom">
                 <div class="card-header-custom"><i class="fas fa-id-card"></i> ข้อมูลผู้ขับขี่ & รถ</div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">ชื่อ-สกุล <span class="required-star">*</span></label>
-                            <input type="text" class="form-control" id="driverName" name="driverName" placeholder="ระบุชื่อและนามสกุล">
+                            <input type="text" class="form-control form-control-lg" id="driverName" name="driverName" placeholder="ระบุชื่อและนามสกุล">
                             <div class="invalid-feedback-custom">กรุณาระบุชื่อ-สกุล</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">เบอร์โทรศัพท์ (10 หลัก) <span class="required-star">*</span></label>
-                            <input type="tel" class="form-control" id="phone" name="phone" maxlength="10" placeholder="08xxxxxxxx" 
-                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"> <div class="invalid-feedback-custom">กรุณาระบุเบอร์โทรศัพท์ให้ครบ 10 หลัก</div>
+                            <input type="tel" class="form-control form-control-lg" id="phone" name="phone" maxlength="10" placeholder="08xxxxxxxx" 
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            <div class="invalid-feedback-custom">กรุณาระบุเบอร์โทรศัพท์ให้ครบ 10 หลัก</div>
                         </div>
                         <div class="col-6">
                             <label class="form-label">ทะเบียนหัว <span class="required-star">*</span></label>
@@ -82,6 +95,7 @@
                         <div class="col-6">
                             <label class="form-label">บริษัท <span class="required-star">*</span></label>
                             <select class="form-select" id="company" name="company">
+                                <option value="">เลือก...</option>
                                 <option value="Triple C">Triple C</option>
                                 <option value="PROME">PROME</option>
                                 <option value="SMILE">SMILE</option>
@@ -94,11 +108,11 @@
                             <label class="form-label">โซน <span class="required-star">*</span></label>
                             <div class="btn-group w-100" role="group">
                                 <input type="radio" class="btn-check" name="zone" id="zA" value="A" checked>
-                                <label class="btn btn-outline-primary" for="zA">Zone A</label>
+                                <label class="btn btn-outline-primary py-2" for="zA">Zone A</label>
                                 <input type="radio" class="btn-check" name="zone" id="zB" value="B">
-                                <label class="btn btn-outline-primary" for="zB">Zone B</label>
+                                <label class="btn btn-outline-primary py-2" for="zB">Zone B</label>
                                 <input type="radio" class="btn-check" name="zone" id="zC" value="C">
-                                <label class="btn btn-outline-primary" for="zC">Zone C</label>
+                                <label class="btn btn-outline-primary py-2" for="zC">Zone C</label>
                             </div>
                         </div>
                     </div>
@@ -107,38 +121,40 @@
 
             <div class="card card-custom">
                 <div class="card-header-custom"><i class="fas fa-cubes"></i> สภาพทั่วไป</div>
-                <div class="card-body" id="generalList"></div>
+                <div class="card-body p-4" id="generalList"></div>
             </div>
 
             <div class="card card-custom">
                 <div class="card-header-custom"><i class="fas fa-cogs"></i> ช่วงล่างและเพลา (Safety)</div>
-                <div class="card-body" id="axleList"></div>
+                <div class="card-body p-4" id="axleList"></div>
             </div>
 
             <div class="card card-custom">
                 <div class="card-header-custom"><i class="fas fa-lightbulb"></i> ระบบไฟสัญญาณ (กฎหมาย)</div>
-                <div class="card-body" id="lightList"></div>
+                <div class="card-body p-4" id="lightList"></div>
             </div>
 
             <div class="card card-custom">
-                <div class="card-header-custom"><i class="fas fa-camera"></i> หลักฐาน</div>
-                <div class="card-body">
-                    <div class="mb-3">
+                <div class="card-header-custom"><i class="fas fa-camera"></i> หลักฐานและการยืนยัน</div>
+                <div class="card-body p-4">
+                    <div class="mb-4">
                         <label class="form-label">รูปภาพประกอบ <span class="required-star">*</span></label>
-                        <input type="file" class="form-control" id="fileInput" accept="image/*">
+                        <input type="file" class="form-control form-control-lg" id="fileInput" accept="image/*">
                         <div class="invalid-feedback-custom">กรุณาอัปโหลดรูปภาพประกอบ</div>
-                        <div class="form-text">ต้องแนบรูปถ่ายสภาพรถทุกครั้ง</div>
+                        <div class="form-text text-muted mt-2"><i class="fas fa-info-circle"></i> ต้องแนบรูปถ่ายสภาพรถทุกครั้งเพื่อยืนยัน</div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">หมายเหตุ</label>
-                        <textarea class="form-control" id="remarks" name="remarks" rows="2"></textarea>
+                    <div class="mb-4">
+                        <label class="form-label">หมายเหตุเพิ่มเติม</label>
+                        <textarea class="form-control" id="remarks" name="remarks" rows="3" placeholder="ระบุอาการเสีย หรือ รายละเอียดเพิ่มเติม..."></textarea>
                     </div>
                     
                     <input type="hidden" name="lat" id="lat">
                     <input type="hidden" name="long" id="long">
 
-                    <button type="button" id="reviewBtn" class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-sm" onclick="validateAndShowSummary()" disabled>
-                        <i class="fas fa-clipboard-check"></i> ตรวจสอบข้อมูลก่อนส่ง
+                    <button type="button" id="reviewBtn" class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-lg" 
+                            style="font-size: 1.2rem; background: linear-gradient(45deg, #0d47a1, #1976d2); border: none;"
+                            onclick="validateAndShowSummary()" disabled>
+                        <i class="fas fa-clipboard-check me-2"></i> ตรวจสอบข้อมูลก่อนส่ง
                     </button>
                 </div>
             </div>
@@ -147,24 +163,32 @@
 
     <div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="fas fa-file-invoice"></i> ยืนยันข้อมูล</h5>
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #0d47a1, #1976d2);">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-file-invoice me-2"></i> ยืนยันข้อมูลการตรวจสอบ</h5>
                 </div>
-                <div class="modal-body">
-                    <div class="alert alert-info py-2"><small>หากพบค่า <b>"แก้ไข"</b> (สีแดง) แสดงว่าท่านระบุว่ารถมีปัญหา</small></div>
-                    <table class="table table-bordered table-striped">
-                        <tbody id="summaryContent"></tbody>
-                    </table>
-                    <div class="text-center">
-                        <label class="fw-bold">รูปภาพ:</label><br>
-                        <img id="summaryImage" class="preview-img" src="">
+                <div class="modal-body p-4">
+                    <div class="alert alert-info py-2 mb-3 border-0 shadow-sm" style="background-color: #e3f2fd; color: #0d47a1;">
+                        <i class="fas fa-info-circle me-1"></i> กรุณาตรวจสอบความถูกต้อง หากพบค่า <b class="text-danger">"แก้ไข"</b> แสดงว่าท่านระบุว่ารถมีปัญหา
+                    </div>
+                    
+                    <div class="table-responsive rounded-3 border">
+                        <table class="table table-striped mb-0">
+                            <tbody id="summaryContent"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <label class="fw-bold mb-2 text-secondary">รูปภาพที่แนบ:</label><br>
+                        <img id="summaryImage" class="preview-img shadow-sm" src="" alt="Image Preview">
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">แก้ไข</button>
-                    <button type="button" class="btn btn-success fw-bold px-4" id="confirmSubmitBtn" onclick="confirmAndSend()">
-                        <i class="fas fa-paper-plane"></i> ยืนยันการส่ง
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary px-4 py-2" data-bs-dismiss="modal">
+                        <i class="fas fa-arrow-left me-1"></i> กลับไปแก้ไข
+                    </button>
+                    <button type="button" class="btn btn-success fw-bold px-4 py-2 shadow" id="confirmSubmitBtn" onclick="confirmAndSend()">
+                        <i class="fas fa-paper-plane me-1"></i> ยืนยันการส่งข้อมูล
                     </button>
                 </div>
             </div>
@@ -174,9 +198,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-      
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt1So5aFxrYah8bds4rXO8DW6_vOO61g8N-zyJQwZJ0w8pwULoKcaoVZ6saSjUnTZN/exec'; 
- 
 
         const allItems = [
             { id: 'status_rail', label: 'ราวข้าง', group: 'generalList' },
@@ -205,17 +227,17 @@
             allItems.forEach(item => {
                 const container = document.getElementById(item.group);
                 const html = `
-                <div class="mb-3 border-bottom pb-2">
-                    <label class="fw-bold mb-1">${item.label}</label>
+                <div class="mb-4 border-bottom pb-3">
+                    <label class="fw-bold mb-2 d-block text-secondary" style="font-size: 1.05rem;">${item.label}</label>
                     <div class="btn-group w-100" role="group">
                         <input type="radio" class="btn-check" name="${item.id}" id="${item.id}_1" value="ปกติ">
-                        <label class="btn btn-outline-success" for="${item.id}_1">ปกติ</label>
+                        <label class="btn btn-outline-success py-2" for="${item.id}_1"><i class="fas fa-check me-1"></i> ปกติ</label>
 
                         <input type="radio" class="btn-check" name="${item.id}" id="${item.id}_2" value="พอใช้">
-                        <label class="btn btn-outline-warning" for="${item.id}_2">พอใช้</label>
+                        <label class="btn btn-outline-warning py-2" for="${item.id}_2">พอใช้</label>
 
                         <input type="radio" class="btn-check" name="${item.id}" id="${item.id}_3" value="แก้ไข" checked>
-                        <label class="btn btn-outline-danger" for="${item.id}_3">แก้ไข</label>
+                        <label class="btn btn-outline-danger py-2" for="${item.id}_3"><i class="fas fa-tools me-1"></i> แก้ไข</label>
                     </div>
                 </div>`;
                 container.insertAdjacentHTML('beforeend', html);
@@ -238,16 +260,16 @@
                         alert.classList.remove('alert-warning');
                         alert.classList.add('alert-success');
                         document.getElementById('gpsSpinner').style.display = 'none';
-                        document.getElementById('gpsText').innerHTML = '<i class="fas fa-satellite-dish"></i> GPS พร้อมใช้งาน';
+                        document.getElementById('gpsText').innerHTML = '<i class="fas fa-satellite-dish me-2"></i> GPS พร้อมใช้งาน';
                         
                         const coordsDiv = document.getElementById('gpsCoords');
                         coordsDiv.style.display = 'block';
-                        coordsDiv.innerHTML = `<i class="fas fa-map-marker-alt"></i> พิกัด: ${lat}, ${long}`;
+                        coordsDiv.innerHTML = `<i class="fas fa-map-marker-alt me-1"></i> พิกัด: ${lat}, ${long}`;
                         
                         document.getElementById('reviewBtn').disabled = false;
                     },
                     (err) => {
-                        document.getElementById('gpsText').innerHTML = '❌ ไม่สามารถดึง GPS ได้ (กรุณาเปิด Location)';
+                        document.getElementById('gpsText').innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i> ไม่สามารถดึง GPS ได้ (กรุณาเปิด Location)';
                         document.getElementById('gpsSpinner').style.display = 'none';
                     },
                     { enableHighAccuracy: true } // ขอความแม่นยำสูงสุด
@@ -307,20 +329,22 @@
             tbody.innerHTML = '';
 
             const addRow = (label, val) => {
-                tbody.innerHTML += `<tr><td class="summary-label fw-bold" style="width:40%">${label}</td><td>${val}</td></tr>`;
+                tbody.innerHTML += `<tr><td class="text-secondary" style="width:40%; font-weight:600;">${label}</td><td style="font-weight:500;">${val}</td></tr>`;
             }
 
             addRow('คนขับ', document.getElementById('driverName').value);
             addRow('เบอร์โทร', document.getElementById('phone').value);
-            addRow('ทะเบียน', `${document.getElementById('plateHead').value} / ${document.getElementById('plateTail').value}`);
-            addRow('เลขไมล์', document.getElementById('odometer').value);
+            addRow('ทะเบียน', `<span class="badge bg-primary">${document.getElementById('plateHead').value}</span> / <span class="badge bg-info text-dark">${document.getElementById('plateTail').value}</span>`);
+            addRow('เลขไมล์', document.getElementById('odometer').value + ' กม.');
             addRow('บริษัท', document.getElementById('company').value);
+            addRow('พิกัด', document.getElementById('lat').value + ', ' + document.getElementById('long').value);
 
             // Loop เช็คลิสต์
             allItems.forEach(item => {
                 const val = document.querySelector(`input[name="${item.id}"]:checked`).value;
-                const color = val === 'แก้ไข' ? 'text-danger fw-bold' : (val === 'พอใช้' ? 'text-warning' : 'text-success');
-                tbody.innerHTML += `<tr><td class="fw-bold">${item.label}</td><td class="${color}">${val}</td></tr>`;
+                const color = val === 'แก้ไข' ? 'text-danger fw-bold' : (val === 'พอใช้' ? 'text-warning fw-bold' : 'text-success fw-bold');
+                const icon = val === 'แก้ไข' ? '<i class="fas fa-times-circle"></i>' : (val === 'พอใช้' ? '<i class="fas fa-exclamation-circle"></i>' : '<i class="fas fa-check-circle"></i>');
+                tbody.innerHTML += `<tr><td>${item.label}</td><td class="${color}">${icon} ${val}</td></tr>`;
             });
 
             // รูปภาพ
@@ -339,7 +363,7 @@
         function confirmAndSend() {
             const btn = document.getElementById('confirmSubmitBtn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังส่ง...';
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> กำลังส่งข้อมูล...';
             btn.disabled = true;
 
             const form = document.getElementById('mainForm');
@@ -368,11 +392,11 @@
                 mode: 'no-cors'
             })
             .then(() => {
-                alert('✅ บันทึกข้อมูลเรียบร้อย!');
+                alert('✅ บันทึกข้อมูลสำเร็จ! ขอบคุณที่ร่วมมือตรวจสอบครับ');
                 window.location.reload();
             })
             .catch(err => {
-                alert('Error: ' + err);
+                alert('❌ เกิดข้อผิดพลาดในการส่งข้อมูล: ' + err);
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             });

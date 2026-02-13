@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบตรวจเช็ครถ (Production Grade)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f0f2f5; padding-bottom: 80px; }
+        .header-bg { background: linear-gradient(135deg, #0d47a1 0%, #1976d2 100%); color: white; padding: 25px 0; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .card-custom { border: none; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 15px; overflow: hidden; }
+        .card-header-custom { background-color: #fff; border-bottom: 1px solid #eee; padding: 15px; font-weight: bold; color: #0d47a1; display: flex; align-items: center; }
+        .card-header-custom i { margin-right: 10px; font-size: 1.2rem; }
+        .required-star { color: red; margin-left: 3px; font-weight: bold; }
+        
+        /* Custom Radio Buttons */
+        .btn-check:checked + .btn-outline-success { background-color: #2e7d32; color: white; font-weight: bold; }
+        .btn-check:checked + .btn-outline-warning { background-color: #f57f17; color: white; font-weight: bold; }
+        .btn-check:checked + .btn-outline-danger { background-color: #c62828; color: white; font-weight: bold; }
+        
+        /* Validation Error Style */
+        .is-invalid { border-color: #dc3545 !important; background-image: none !important; }
+        .invalid-feedback-custom { color: #dc3545; font-size: 0.875em; margin-top: 0.25rem; display: none; }
+        .is-invalid + .invalid-feedback-custom { display: block; }
+
+        .preview-img { width: 100%; max-height: 300px; object-fit: contain; border: 1px solid #ddd; border-radius: 8px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header-bg text-center">
+        <h3 class="mb-0"><i class="fas fa-truck-moving"></i> ตรวจเช็ครถบรรทุก</h3>
+        <small class="opacity-75">แบบฟอร์มอัปเดตข้อมูลรถหัวลากและหาง
+เพื่อนำเข้าข้อมูลการใช้หัวลากและหางรถบรรทุก Logistics PSRU </small>
+    </div>
+
+    <div class="container" style="max-width: 800px;">
+        
+        <div id="gpsStatus" class="alert alert-warning shadow-sm" role="alert">
+            <div class="d-flex align-items-center">
+                <div class="spinner-border spinner-border-sm me-2" id="gpsSpinner"></div>
+                <strong id="gpsText">กำลังค้นหาดาวเทียม GPS...</strong>
+            </div>
+            <div id="gpsCoords" class="mt-2 text-primary fw-bold" style="display:none; font-family: monospace;">
+                </div>
+        </div>
+
+        <form id="mainForm" novalidate>
+            
+            <div class="card card-custom">
+                <div class="card-header-custom"><i class="fas fa-id-card"></i> ข้อมูลผู้ขับขี่ & รถ</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">ชื่อ-สกุล <span class="required-star">*</span></label>
+                            <input type="text" class="form-control" id="driverName" name="driverName" placeholder="ระบุชื่อและนามสกุล">
+                            <div class="invalid-feedback-custom">กรุณาระบุชื่อ-สกุล</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">เบอร์โทรศัพท์ (10 หลัก) <span class="required-star">*</span></label>
+                            <input type="tel" class="form-control" id="phone" name="phone" maxlength="10" placeholder="08xxxxxxxx" 
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"> <div class="invalid-feedback-custom">กรุณาระบุเบอร์โทรศัพท์ให้ครบ 10 หลัก</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">ทะเบียนหัว <span class="required-star">*</span></label>
+                            <input type="text" class="form-control" id="plateHead" name="plateHead">
+                            <div class="invalid-feedback-custom">กรุณาระบุทะเบียนหัว</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">ทะเบียนหาง <span class="required-star">*</span></label>
+                            <input type="text" class="form-control" id="plateTail" name="plateTail">
+                            <div class="invalid-feedback-custom">กรุณาระบุทะเบียนหาง</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">เลขไมล์ <span class="required-star">*</span></label>
+                            <input type="number" class="form-control" id="odometer" name="odometer">
+                            <div class="invalid-feedback-custom">กรุณาระบุเลขไมล์</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">บริษัท <span class="required-star">*</span></label>
+                            <select class="form-select" id="company" name="company">
+                                <option value="Triple C">Triple C</option>
+                                <option value="PROME">PROME</option>
+                                <option value="SMILE">SMILE</option>
+                                <option value="SK">SK</option>
+                                <option value="Sonic">Sonic</option>
+                            </select>
+                            <div class="invalid-feedback-custom">กรุณาเลือกบริษัท</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">โซน <span class="required-star">*</span></label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="zone" id="zA" value="A" checked>
+                                <label class="btn btn-outline-primary" for="zA">Zone A</label>
+                                <input type="radio" class="btn-check" name="zone" id="zB" value="B">
+                                <label class="btn btn-outline-primary" for="zB">Zone B</label>
+                                <input type="radio" class="btn-check" name="zone" id="zC" value="C">
+                                <label class="btn btn-outline-primary" for="zC">Zone C</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-custom">
+                <div class="card-header-custom"><i class="fas fa-cubes"></i> สภาพทั่วไป</div>
+                <div class="card-body" id="generalList"></div>
+            </div>
+
+            <div class="card card-custom">
+                <div class="card-header-custom"><i class="fas fa-cogs"></i> ช่วงล่างและเพลา (Safety)</div>
+                <div class="card-body" id="axleList"></div>
+            </div>
+
+            <div class="card card-custom">
+                <div class="card-header-custom"><i class="fas fa-lightbulb"></i> ระบบไฟสัญญาณ (กฎหมาย)</div>
+                <div class="card-body" id="lightList"></div>
+            </div>
+
+            <div class="card card-custom">
+                <div class="card-header-custom"><i class="fas fa-camera"></i> หลักฐาน</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">รูปภาพประกอบ <span class="required-star">*</span></label>
+                        <input type="file" class="form-control" id="fileInput" accept="image/*">
+                        <div class="invalid-feedback-custom">กรุณาอัปโหลดรูปภาพประกอบ</div>
+                        <div class="form-text">ต้องแนบรูปถ่ายสภาพรถทุกครั้ง</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">หมายเหตุ</label>
+                        <textarea class="form-control" id="remarks" name="remarks" rows="2"></textarea>
+                    </div>
+                    
+                    <input type="hidden" name="lat" id="lat">
+                    <input type="hidden" name="long" id="long">
+
+                    <button type="button" id="reviewBtn" class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-sm" onclick="validateAndShowSummary()" disabled>
+                        <i class="fas fa-clipboard-check"></i> ตรวจสอบข้อมูลก่อนส่ง
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="modal fade" id="summaryModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-file-invoice"></i> ยืนยันข้อมูล</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info py-2"><small>หากพบค่า <b>"แก้ไข"</b> (สีแดง) แสดงว่าท่านระบุว่ารถมีปัญหา</small></div>
+                    <table class="table table-bordered table-striped">
+                        <tbody id="summaryContent"></tbody>
+                    </table>
+                    <div class="text-center">
+                        <label class="fw-bold">รูปภาพ:</label><br>
+                        <img id="summaryImage" class="preview-img" src="">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">แก้ไข</button>
+                    <button type="button" class="btn btn-success fw-bold px-4" id="confirmSubmitBtn" onclick="confirmAndSend()">
+                        <i class="fas fa-paper-plane"></i> ยืนยันการส่ง
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt1So5aFxrYah8bds4rXO8DW6_vOO61g8N-zyJQwZJ0w8pwULoKcaoVZ6saSjUnTZN/exec'; 
+ 
+
+        const allItems = [
+            { id: 'status_rail', label: 'ราวข้าง', group: 'generalList' },
+            { id: 'status_twist', label: 'ทวิสล็อคตู้ 8 จุด', group: 'generalList' },
+            { id: 'status_mud', label: 'บังโคลน', group: 'generalList' },
+            { id: 'status_tax', label: 'ภาษี', group: 'generalList' },
+            { id: 'status_bearing', label: 'ลูกปืนล้อ/จาระบี', group: 'axleList' },
+            { id: 'status_seal', label: 'ซีลกันน้ำมัน/บ่าวิ่ง', group: 'axleList' },
+            { id: 'status_brake', label: 'ผ้าเบรก', group: 'axleList' },
+            { id: 'status_bolt', label: 'น็อต/โครงยึดเพลา', group: 'axleList' },
+            { id: 'status_tire', label: 'ศูนย์ล้อและยาง', group: 'axleList' },
+            { id: 'status_turn', label: 'ไฟเลี้ยวท้าย', group: 'lightList' },
+            { id: 'status_tail', label: 'ไฟท้าย/เบรก', group: 'lightList' },
+            { id: 'status_reverse', label: 'ไฟถอยหลัง', group: 'lightList' },
+            { id: 'status_plate', label: 'ไฟส่องป้าย', group: 'lightList' },
+            { id: 'status_side', label: 'ไฟข้างรถ', group: 'lightList' }
+        ];
+
+        window.onload = function() {
+            renderChecklist();
+            initGPS();
+        };
+
+        // 1. Render Checklist (บังคับ Default = แก้ไข)
+        function renderChecklist() {
+            allItems.forEach(item => {
+                const container = document.getElementById(item.group);
+                const html = `
+                <div class="mb-3 border-bottom pb-2">
+                    <label class="fw-bold mb-1">${item.label}</label>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="${item.id}" id="${item.id}_1" value="ปกติ">
+                        <label class="btn btn-outline-success" for="${item.id}_1">ปกติ</label>
+
+                        <input type="radio" class="btn-check" name="${item.id}" id="${item.id}_2" value="พอใช้">
+                        <label class="btn btn-outline-warning" for="${item.id}_2">พอใช้</label>
+
+                        <input type="radio" class="btn-check" name="${item.id}" id="${item.id}_3" value="แก้ไข" checked>
+                        <label class="btn btn-outline-danger" for="${item.id}_3">แก้ไข</label>
+                    </div>
+                </div>`;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        // 2. GPS Logic (แสดงพิกัดชัดเจน)
+        function initGPS() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const lat = pos.coords.latitude.toFixed(6);
+                        const long = pos.coords.longitude.toFixed(6);
+                        
+                        document.getElementById('lat').value = lat;
+                        document.getElementById('long').value = long;
+                        
+                        // Update UI
+                        const alert = document.getElementById('gpsStatus');
+                        alert.classList.remove('alert-warning');
+                        alert.classList.add('alert-success');
+                        document.getElementById('gpsSpinner').style.display = 'none';
+                        document.getElementById('gpsText').innerHTML = '<i class="fas fa-satellite-dish"></i> GPS พร้อมใช้งาน';
+                        
+                        const coordsDiv = document.getElementById('gpsCoords');
+                        coordsDiv.style.display = 'block';
+                        coordsDiv.innerHTML = `<i class="fas fa-map-marker-alt"></i> พิกัด: ${lat}, ${long}`;
+                        
+                        document.getElementById('reviewBtn').disabled = false;
+                    },
+                    (err) => {
+                        document.getElementById('gpsText').innerHTML = '❌ ไม่สามารถดึง GPS ได้ (กรุณาเปิด Location)';
+                        document.getElementById('gpsSpinner').style.display = 'none';
+                    },
+                    { enableHighAccuracy: true } // ขอความแม่นยำสูงสุด
+                );
+            } else { alert("Browser ไม่รองรับ GPS"); }
+        }
+
+        // 3. Validation Logic (ระบบฟ้อง error)
+        function validateAndShowSummary() {
+            // ล้าง Error เก่าก่อน
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            let errors = [];
+            let firstErrorElement = null;
+
+            // Helper check function
+            const checkField = (id, msg) => {
+                const el = document.getElementById(id);
+                if (!el.value.trim()) {
+                    el.classList.add('is-invalid');
+                    errors.push(msg);
+                    if(!firstErrorElement) firstErrorElement = el;
+                }
+            };
+
+            checkField('driverName', 'ชื่อ-สกุล');
+            
+            // เช็คเบอร์โทร (ต้องมีค่า และ ครบ 10 หลัก)
+            const phoneEl = document.getElementById('phone');
+            if (!phoneEl.value || phoneEl.value.length !== 10) {
+                phoneEl.classList.add('is-invalid');
+                errors.push('เบอร์โทรศัพท์ (ต้องครบ 10 หลัก)');
+                if(!firstErrorElement) firstErrorElement = phoneEl;
+            }
+
+            checkField('plateHead', 'ทะเบียนหัว');
+            checkField('plateTail', 'ทะเบียนหาง');
+            checkField('odometer', 'เลขไมล์');
+            checkField('company', 'บริษัท');
+            checkField('fileInput', 'รูปภาพประกอบ');
+
+            // ถ้ามี Error ให้แจ้งเตือน
+            if (errors.length > 0) {
+                alert("⚠️ ข้อมูลไม่ครบถ้วน กรุณาตรวจสอบ:\n- " + errors.join("\n- "));
+                if(firstErrorElement) {
+                    firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstErrorElement.focus();
+                }
+                return; // หยุดทำงาน ไม่เปิด Modal
+            }
+
+            // ถ้าผ่านหมด -> เปิดหน้าสรุป
+            showSummaryModal();
+        }
+
+        function showSummaryModal() {
+            const tbody = document.getElementById('summaryContent');
+            tbody.innerHTML = '';
+
+            const addRow = (label, val) => {
+                tbody.innerHTML += `<tr><td class="summary-label fw-bold" style="width:40%">${label}</td><td>${val}</td></tr>`;
+            }
+
+            addRow('คนขับ', document.getElementById('driverName').value);
+            addRow('เบอร์โทร', document.getElementById('phone').value);
+            addRow('ทะเบียน', `${document.getElementById('plateHead').value} / ${document.getElementById('plateTail').value}`);
+            addRow('เลขไมล์', document.getElementById('odometer').value);
+            addRow('บริษัท', document.getElementById('company').value);
+
+            // Loop เช็คลิสต์
+            allItems.forEach(item => {
+                const val = document.querySelector(`input[name="${item.id}"]:checked`).value;
+                const color = val === 'แก้ไข' ? 'text-danger fw-bold' : (val === 'พอใช้' ? 'text-warning' : 'text-success');
+                tbody.innerHTML += `<tr><td class="fw-bold">${item.label}</td><td class="${color}">${val}</td></tr>`;
+            });
+
+            // รูปภาพ
+            const file = document.getElementById('fileInput').files[0];
+            const img = document.getElementById('summaryImage');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => img.src = e.target.result;
+                reader.readAsDataURL(file);
+            }
+
+            new bootstrap.Modal(document.getElementById('summaryModal')).show();
+        }
+
+        // 4. Send Data
+        function confirmAndSend() {
+            const btn = document.getElementById('confirmSubmitBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังส่ง...';
+            btn.disabled = true;
+
+            const form = document.getElementById('mainForm');
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((v, k) => data[k] = v);
+
+            const file = document.getElementById('fileInput').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    data.fileData = e.target.result;
+                    data.fileName = file.name;
+                    postData(data, btn, originalText);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                postData(data, btn, originalText);
+            }
+        }
+
+        function postData(data, btn, originalText) {
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                mode: 'no-cors'
+            })
+            .then(() => {
+                alert('✅ บันทึกข้อมูลเรียบร้อย!');
+                window.location.reload();
+            })
+            .catch(err => {
+                alert('Error: ' + err);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
